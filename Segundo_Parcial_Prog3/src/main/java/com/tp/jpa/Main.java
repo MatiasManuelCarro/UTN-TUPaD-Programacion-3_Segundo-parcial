@@ -10,8 +10,10 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Scanner;
 
+
 public class Main {
     public static void main(String[] args) {
+
 
             Scanner sc = new Scanner(System.in);
 
@@ -67,10 +69,19 @@ public class Main {
                     switch (opcion) {
 
                             case 1 -> {
-                                    // ALTA
                                     System.out.println("\n--- ALTA DE CATEGORÍA ---");
                                     System.out.print("Nombre: ");
                                     String nombre = sc.nextLine();
+
+                                    //Validacion de nombre duplicado
+                                    boolean existe = categoriaRepo.listarActivos()
+                                            .stream()
+                                            .anyMatch(c -> c.getNombre().equalsIgnoreCase(nombre));
+
+                                    if (existe) {
+                                            System.out.println("Ya existe una categoría con ese nombre.");
+                                            break;
+                                    }
 
                                     System.out.print("Descripción: ");
                                     String descripcion = sc.nextLine();
@@ -190,8 +201,9 @@ public class Main {
                                                 System.out.println("ID: " + c.getId() + " | " + c.getNombre())
                                         );
 
+                                        //verificar long
                                         System.out.print("Seleccione ID de categoría: ");
-                                        Long idCat = Long.parseLong(sc.nextLine());
+                                        Long idCat = leerLongSeguro(sc, "Seleccione ID de categoría: ");
 
                                         Optional<Categoria> optionalCat = categoriaRepo.buscarPorId(idCat);
 
@@ -359,12 +371,29 @@ public class Main {
                                         }
                                 }
 
+
+
+
                                 case 0 -> System.out.println("Volviendo al menú principal...");
                                 default -> System.out.println("Opción inválida.");
                         }
 
                 } while (opcion != 0);
         }
+        private static Long leerLongSeguro(Scanner sc, String mensaje) {
+                while (true) {
+                        System.out.print(mensaje);
+                        String input = sc.nextLine();
+
+                        try {
+                                return Long.parseLong(input);
+                        } catch (NumberFormatException e) {
+                                System.out.println("Debe ingresar un número válido.");
+                        }
+                }
+        }
 
 
 }
+
+
