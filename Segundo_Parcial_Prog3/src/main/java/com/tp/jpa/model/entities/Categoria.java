@@ -1,4 +1,4 @@
-package ar.edu.tup.programacion3.entities;
+package com.tp.jpa.model.entities;
 
 import jakarta.persistence.*;
 import lombok.*;

@@ -1,4 +1,4 @@
-package ar.edu.tup.programacion3.entities;
+package com.tp.jpa.model.entities;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -16,8 +16,6 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @EqualsAndHashCode(of = {"id"})
 public abstract class Base {
-
-//    protected static long idCounter = 0;
 
 
     @Id
