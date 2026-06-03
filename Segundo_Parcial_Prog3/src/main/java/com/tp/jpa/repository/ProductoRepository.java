@@ -32,7 +32,7 @@ public class ProductoRepository extends BaseRepository<Producto> {
         EntityManager em = emf.createEntityManager();
         try {
             return em.createQuery(
-                            "SELECT p FROM Producto p WHERE p.nombre = :nombre",
+                            "SELECT p FROM Producto p WHERE p.nombre = LOWER(:nombre)",
                             Producto.class
                     ).setParameter("nombre", nombre)
                     .getResultList();

@@ -50,7 +50,7 @@ public abstract class BaseRepository<T extends Base> {
         }
     }
 
-    // ===== 3. listarArchivos =====
+    // ===== 3. listarActivos  =====
     public List<T> listarActivos() {
         var em = emf.createEntityManager();
 
@@ -63,7 +63,21 @@ public abstract class BaseRepository<T extends Base> {
         }
     }
 
-    // ===== 4. eliminarLogico(Long id) =====
+    // ===== 3. listarInactivos =====
+    public List<T> listarInactivos() {
+        var em = emf.createEntityManager();
+
+        try {
+            String jpql = "SELECT e FROM " + entityClass.getSimpleName() + " e WHERE e.eliminado = true";
+            return em.createQuery(jpql, entityClass).getResultList();
+
+        } finally {
+            em.close();
+        }
+    }
+
+
+    // ===== 4. eliminarLogico =====
 
     public boolean eliminarLogico(Long id) {
         var em = emf.createEntityManager();
@@ -88,6 +102,37 @@ public abstract class BaseRepository<T extends Base> {
                 tx.rollback();
             }
             throw new RuntimeException("Error al eliminar lógicamente la entidad", e);
+
+        } finally {
+            em.close();
+        }
+    }
+
+    // Alta logixa
+
+    public boolean AltaLogica(Long id) {
+        var em = emf.createEntityManager();
+        var tx = em.getTransaction();
+
+        try {
+            T entity = em.find(entityClass, id);
+
+            if (entity == null) {
+                return false; //no existe -> retorna falso
+            }
+
+            tx.begin();
+            entity.setEliminado(false);
+            em.merge(entity);
+            tx.commit();
+
+            return true;
+
+        } catch (Exception e) {
+            if (tx.isActive()) {
+                tx.rollback();
+            }
+            throw new RuntimeException("Error al dar de alta la entidad la entidad", e);
 
         } finally {
             em.close();

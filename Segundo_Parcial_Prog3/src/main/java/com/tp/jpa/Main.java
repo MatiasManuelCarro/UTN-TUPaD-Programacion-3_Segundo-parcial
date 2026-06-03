@@ -4,7 +4,6 @@ import com.tp.jpa.model.entities.Categoria;
 import com.tp.jpa.model.entities.Producto;
 import com.tp.jpa.repository.CategoriaRepository;
 import com.tp.jpa.repository.ProductoRepository;
-import jdk.swing.interop.SwingInterOpUtils;
 
 import java.util.List;
 import java.util.Optional;
@@ -29,7 +28,9 @@ public class Main {
                     System.out.println("3. Reportes");
                     System.out.println("0. Salir");
                     System.out.print("Seleccione una opción: ");
-                    opcion = Integer.parseInt(sc.nextLine());
+
+
+                    opcion = intSeguro(sc, "Ingrese un numero");
 
                     switch (opcion) {
 
@@ -39,7 +40,6 @@ public class Main {
 
                             case 3 -> {
                                     System.out.println("\n--- REPORTES ---");
-                                    System.out.println("Aún no implementado.");
                             }
 
                             case 0 -> System.out.println("Saliendo del sistema...");
@@ -62,9 +62,10 @@ public class Main {
                     System.out.println("2. Baja lógica de categoría");
                     System.out.println("3. Modificación de categoría");
                     System.out.println("4. Listado de categorías activas");
-                    System.out.println("0. Salir");
+                    System.out.println("0. Volver al Menu Principal");
                     System.out.print("Seleccione una opción: ");
-                    opcion = Integer.parseInt(sc.nextLine());
+                    opcion = intSeguro(sc, "Ingrese un numero");
+
 
                     switch (opcion) {
 
@@ -78,9 +79,34 @@ public class Main {
                                             .stream()
                                             .anyMatch(c -> c.getNombre().equalsIgnoreCase(nombre));
 
+                                    Optional<Categoria> categoriaInactiva = categoriaRepo.listarInactivos()
+                                            .stream()
+                                            .filter(c -> c.getNombre().equalsIgnoreCase(nombre))
+                                            .findFirst();
+
+                                    //verificacion de categoria repetida
                                     if (existe) {
                                             System.out.println("Ya existe una categoría con ese nombre.");
-                                            break;
+                                            break;}
+                                    //verificacion de categoria existente pero con baja logica
+                                    if (categoriaInactiva.isPresent()) {
+                                            System.out.println("Ya existe una categoría con ese nombre, pero se encuentra inactiva" +
+                                                    "\n ¿Desea activarla nuevamente");
+                                            System.out.println("1. Si");
+                                            System.out.println("2. No");
+                                            int opcionAlta = intSeguro(sc, "Seleccione una opción: ");
+
+                                            switch (opcionAlta){
+                                                    case 1 -> {
+                                                            Categoria cat = categoriaInactiva.get();
+                                                            categoriaRepo.AltaLogica(cat.getId());
+                                                            System.out.println("Categoría reactivada correctamente. ID: " + cat.getId());
+                                                    }
+                                                    case 2 -> System.out.println("Operación cancelada.");
+
+                                            }
+                                            break; // sale del de alta
+
                                     }
 
                                     System.out.print("Descripción: ");
@@ -100,7 +126,10 @@ public class Main {
                                     // BAJA LÓGICA
                                     System.out.println("\n--- BAJA LÓGICA DE CATEGORÍA ---");
                                     System.out.print("Ingrese ID: ");
-                                    Long id = Long.parseLong(sc.nextLine());
+
+                                    //ingreso seguro de long
+                                    Long id = LongSeguro(sc, "Seleccione ID ");
+
 
                                     boolean eliminado = categoriaRepo.eliminarLogico(id);
 
@@ -115,7 +144,7 @@ public class Main {
                                     // MODIFICACIÓN
                                     System.out.println("\n--- MODIFICACIÓN DE CATEGORÍA ---");
                                     System.out.print("Ingrese ID: ");
-                                    Long id = Long.parseLong(sc.nextLine());
+                                    Long id = LongSeguro(sc, "Seleccione ID: ");
 
                                     Optional<Categoria> optionalCat = categoriaRepo.buscarPorId(id);
 
@@ -160,14 +189,13 @@ public class Main {
                                     }
                             }
 
-                            case 0 -> System.out.println("Saliendo del sistema...");
-
+                            case 0 -> System.out.println("Volviendo al menú principal...");
                             default -> System.out.println("Opción inválida.");
                     }
 
+
             } while (opcion != 0);
 
-            sc.close();
     }
 
         private static void menuProductos(Scanner sc, ProductoRepository productoRepo, CategoriaRepository categoriaRepo) {
@@ -180,16 +208,17 @@ public class Main {
                         System.out.println("2. Baja lógica de producto");
                         System.out.println("3. Modificación de producto");
                         System.out.println("4. Listado de productos activos");
-                        System.out.println("0. Volver");
+                        System.out.println("0. Volver al Menu Principal");
                         System.out.print("Seleccione una opción: ");
-                        opcion = Integer.parseInt(sc.nextLine());
+                        opcion = intSeguro(sc, "Ingrese un numero");
 
                         switch (opcion) {
 
-                                case 1 -> {
+                                case 1 -> { //Alta de producto
                                         System.out.println("\n--- ALTA DE PRODUCTO ---");
 
                                         List<Categoria> categorias = categoriaRepo.listarActivos();
+
 
                                         if (categorias.isEmpty()) {
                                                 System.out.println("No hay categorías activas. No se puede crear un producto.");
@@ -201,11 +230,13 @@ public class Main {
                                                 System.out.println("ID: " + c.getId() + " | " + c.getNombre())
                                         );
 
-                                        //verificar long
+
                                         System.out.print("Seleccione ID de categoría: ");
-                                        Long idCat = leerLongSeguro(sc, "Seleccione ID de categoría: ");
+                                        //verificar long
+                                        Long idCat = LongSeguro(sc, "Seleccione ID de categoría: ");
 
                                         Optional<Categoria> optionalCat = categoriaRepo.buscarPorId(idCat);
+
 
                                         if (optionalCat.isEmpty() || optionalCat.get().isEliminado()) {
                                                 System.out.println("Categoría inválida.");
@@ -217,18 +248,45 @@ public class Main {
                                         System.out.print("Nombre: ");
                                         String nombre = sc.nextLine();
 
-                                        // VALIDACIÓN DE NOMBRE DUPLICADO
-                                        List<Producto> existentes = productoRepo.buscarPorNombre(nombre);
-                                        if (!existentes.isEmpty()) {
+                                        boolean existe = productoRepo.listarActivos()
+                                                .stream()
+                                                .anyMatch(c -> c.getNombre().equalsIgnoreCase(nombre));
+
+                                        Optional<Producto> prodInactivo = productoRepo.listarInactivos()
+                                                .stream()
+                                                .filter(c -> c.getNombre().equalsIgnoreCase(nombre))
+                                                .findFirst();
+
+                                        //verificacion de producto repetido
+                                        if (existe) {
                                                 System.out.println("Ya existe un producto con ese nombre.");
-                                                break;
+                                                break;}
+
+                                        //verificacion de producto existente pero con baja logica
+                                        if (prodInactivo.isPresent()) {
+                                                System.out.println("Ya existe un producto con ese nombre, pero se encuentra inactivo" +
+                                                        "\n ¿Desea activarlo nuevamente");//
+                                                System.out.println("1. Si");
+                                                System.out.println("2. No");
+                                                int opcionAltaProd = intSeguro(sc, "Seleccione una opción: ");
+
+                                                switch (opcionAltaProd) {
+                                                        case 1 -> {
+                                                                Producto prod = prodInactivo.get();
+                                                                productoRepo.AltaLogica(prod.getId());
+                                                                System.out.println("Producto reactivado correctamente. ID: " + prod.getId());
+                                                        }
+                                                        case 2 -> System.out.println("Operación cancelada.");
+                                        }
+                                        break; // sale del de alta
+
                                         }
 
                                         System.out.print("Descripción: ");
                                         String descripcion = sc.nextLine();
 
                                         System.out.print("Precio: ");
-                                        double precio = Double.parseDouble(sc.nextLine());
+                                        double precio = DoubleSeguro(sc, "Ingrese el precio: ");
 
                                         if (precio <= 0) {
                                                 System.out.println("El precio debe ser mayor a 0.");
@@ -258,11 +316,12 @@ public class Main {
                                         System.out.println("Categoría asignada: " + categoria.getNombre());
                                 }
 
-                                case 2 -> {
+                                case 2 -> { //Baja lógica de producto
                                         System.out.println("\n--- BAJA LÓGICA DE PRODUCTO ---");
 
                                         System.out.print("Ingrese ID del producto: ");
-                                        Long id = Long.parseLong(sc.nextLine());
+
+                                        Long id = LongSeguro(sc, "Seleccione ID de producto: ");
 
                                         Optional<Producto> optionalProd = productoRepo.buscarPorId(id);
 
@@ -282,7 +341,7 @@ public class Main {
                                         }
                                 }
 
-                                case 3 -> {
+                                case 3 -> { //Modificación de producto
                                         System.out.println("\n--- MODIFICACIÓN DE PRODUCTO ---");
 
                                         List<Producto> productos = productoRepo.listarActivos();
@@ -298,8 +357,7 @@ public class Main {
                                                         " | Precio: " + p.getPrecio() + " | Stock: " + p.getStock())
                                         );
 
-                                        System.out.print("Ingrese ID del producto: ");
-                                        Long id = Long.parseLong(sc.nextLine());
+                                        Long id = LongSeguro(sc, "Seleccione ID de producto: ");
 
                                         Optional<Producto> optionalProd = productoRepo.buscarPorId(id);
 
@@ -353,7 +411,7 @@ public class Main {
                                         System.out.println("Producto modificado correctamente.");
                                 }
 
-                                case 4 -> {
+                                case 4 -> { //Listado de productos activos
                                         System.out.println("\n--- LISTADO DE PRODUCTOS ACTIVOS ---");
 
                                         List<Producto> productos = productoRepo.listarActivos();
@@ -373,20 +431,46 @@ public class Main {
 
 
 
-
+                                // Volver
                                 case 0 -> System.out.println("Volviendo al menú principal...");
                                 default -> System.out.println("Opción inválida.");
                         }
 
                 } while (opcion != 0);
         }
-        private static Long leerLongSeguro(Scanner sc, String mensaje) {
+
+        private static Double DoubleSeguro(Scanner sc, String mensaje) {
+                while (true) {
+                        System.out.print(mensaje);
+                        String input = sc.nextLine();
+
+                        try {
+                                return Double.parseDouble(input);
+                        } catch (NumberFormatException e) {
+                                System.out.println("Debe ingresar un número válido.");
+                        }
+                }
+        }
+        private static Long LongSeguro(Scanner sc, String mensaje) {
                 while (true) {
                         System.out.print(mensaje);
                         String input = sc.nextLine();
 
                         try {
                                 return Long.parseLong(input);
+                        } catch (NumberFormatException e) {
+                                System.out.println("Debe ingresar un número válido.");
+                        }
+                }
+        }
+
+        private static int intSeguro(Scanner sc, String message) {
+                while (true) {
+                        System.out.print("Seleccione una opción: ");
+                        String input = sc.nextLine();
+
+                        try {
+                                return Integer.parseInt(input);
                         } catch (NumberFormatException e) {
                                 System.out.println("Debe ingresar un número válido.");
                         }
