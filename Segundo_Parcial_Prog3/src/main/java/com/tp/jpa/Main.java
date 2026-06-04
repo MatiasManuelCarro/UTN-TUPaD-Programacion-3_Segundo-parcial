@@ -74,9 +74,6 @@ public class Main {
                     System.out.print("Nombre: ");
                     String nombre = sc.nextLine();
 
-//                                    validarNombreCategoria(nombre, categoriaRepo, sc);
-
-
                     if (validarNombreCategoria(nombre, categoriaRepo, sc)) {
                         break; // salir del case sin pedir descripción
                     }
@@ -148,21 +145,20 @@ public class Main {
                 }
 
                 case 4 -> {
-                    // LISTADO
+                    // Listar categorias
                     System.out.println("\n--- LISTADO DE CATEGORÍAS ACTIVAS ---");
 
-                    List<Categoria> categorias = categoriaRepo.listarActivos();
-
-                    if (categorias.isEmpty()) {
+                    if (categoriaRepo.listarActivos().stream().findAny().isEmpty()) {
                         System.out.println("No hay categorías activas.");
                     } else {
-                        categorias.forEach(c ->
-                                System.out.println("ID: " + c.getId() +
-                                        " | Nombre: " + c.getNombre() +
-                                        " | Descripción: " + c.getDescripcion())
+                        categoriaRepo.listarActivos().forEach(p ->
+                                System.out.println("ID: " + p.getId() +
+                                        " | Nombre: " + p.getNombre() +
+                                        " | Descripcion: " + p.getDescripcion())
                         );
                     }
                 }
+
 
                 case 0 -> System.out.println("Volviendo al menú principal...");
                 default -> System.out.println("Opción inválida.");
@@ -201,9 +197,12 @@ public class Main {
                     }
 
                     System.out.println("Categorías disponibles:");
-                    categorias.forEach(c ->
-                            System.out.println("ID: " + c.getId() + " | " + c.getNombre())
-                    );
+
+                    categoriaRepo.listarActivos().forEach(cat ->
+                            System.out.println("ID: " + cat.getId() +
+                                    " | Nombre: " + cat.getNombre() +
+                                    " | Descripción: " + cat.getDescripcion())
+                            );
 
 
                     System.out.print("Seleccione ID de categoría: ");
@@ -240,7 +239,7 @@ public class Main {
                     }
 
                     System.out.print("Stock: ");
-                    int stock = Integer.parseInt(sc.nextLine());
+                    int stock = intSeguro(sc, "Ingrese el stock: ");
 
                     if (stock < 0) {
                         System.out.println("El stock no puede ser negativo.");
@@ -290,18 +289,17 @@ public class Main {
                 case 3 -> { //Modificación de producto
                     System.out.println("\n--- MODIFICACIÓN DE PRODUCTO ---");
 
-                    List<Producto> productos = productoRepo.listarActivos();
-
-                    if (productos.isEmpty()) {
+                    if (productoRepo.listarActivos().stream().findAny().isEmpty()) {
                         System.out.println("No hay productos activos.");
-                        break;
+                    } else {
+                        productoRepo.listarActivos().forEach(p ->
+                                System.out.println("ID: " + p.getId() +
+                                        " | Nombre: " + p.getNombre() +
+                                        " | Precio: " + p.getPrecio() +
+                                        " | Stock: " + p.getStock() +
+                                        " | Categoría: " + p.getCategoria().getNombre())
+                        );
                     }
-
-                    System.out.println("Productos activos:");
-                    productos.forEach(p ->
-                            System.out.println("ID: " + p.getId() + " | " + p.getNombre() +
-                                    " | Precio: " + p.getPrecio() + " | Stock: " + p.getStock())
-                    );
 
                     Long id = LongSeguro(sc, "Seleccione ID de producto: ");
 
@@ -370,6 +368,7 @@ public class Main {
                                 System.out.println("ID: " + p.getId() +
                                         " | Nombre: " + p.getNombre() +
                                         " | Precio: " + p.getPrecio() +
+                                        " | Descripcion: " + p.getDescripcion() +
                                         " | Stock: " + p.getStock() +
                                         " | Categoría: " + p.getCategoria().getNombre())
                         );
