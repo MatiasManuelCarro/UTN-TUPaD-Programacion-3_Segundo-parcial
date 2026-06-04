@@ -39,7 +39,47 @@ public class Main {
                 case 2 -> menuProductos(sc, productoRepo, categoriaRepo);
 
                 case 3 -> {
+
                     System.out.println("\n--- REPORTES ---");
+                    System.out.println("Elija una opcion: ");
+
+                    System.out.println("1. Buscar Productos por categoria");
+                    System.out.println("0. Volver al menu principal");
+
+                    int opcionReporte = intSeguro(sc, "Ingrese un numero");
+
+                    switch (opcionReporte) {
+                        case 1 -> {
+
+                            System.out.println("Elija una categoria: ");
+                            categoriaRepo.listarActivos().forEach(p ->
+                                    System.out.println("ID: " + p.getId() +
+                                            " | Nombre: " + p.getNombre() +
+                                            " | Descripción: " + p.getDescripcion())
+                            );
+
+
+                            Long idReporte = LongSeguro(sc, "Seleccione ID de categoría: ");
+
+                            List<Producto> productos = productoRepo.buscarPorCategoria(idReporte);
+
+                            if (productos.isEmpty()) {
+                                System.out.println("No hay productos disponibles en esta categoria");
+                            } else {
+                                productos.forEach(p ->
+                                        System.out.println("ID: " + p.getId() +
+                                                " | Nombre: " + p.getNombre() +
+                                                " | Precio: " + p.getPrecio() +
+                                                " | Stock: " + p.getStock())
+                                );
+                            }
+                        }
+                        case 0 -> {
+                            System.out.println("Volviendo al menú principal...");
+                        }
+                    }
+
+
                 }
 
                 case 0 -> System.out.println("Saliendo del sistema...");
@@ -202,7 +242,7 @@ public class Main {
                             System.out.println("ID: " + cat.getId() +
                                     " | Nombre: " + cat.getNombre() +
                                     " | Descripción: " + cat.getDescripcion())
-                            );
+                    );
 
 
                     System.out.print("Seleccione ID de categoría: ");
@@ -289,10 +329,12 @@ public class Main {
                 case 3 -> { //Modificación de producto
                     System.out.println("\n--- MODIFICACIÓN DE PRODUCTO ---");
 
-                    if (productoRepo.listarActivos().stream().findAny().isEmpty()) {
+                    List<Producto> productos = productoRepo.listarActivos();
+
+                    if (productos.stream().findAny().isEmpty()) {
                         System.out.println("No hay productos activos.");
                     } else {
-                        productoRepo.listarActivos().forEach(p ->
+                        productos.forEach(p ->
                                 System.out.println("ID: " + p.getId() +
                                         " | Nombre: " + p.getNombre() +
                                         " | Precio: " + p.getPrecio() +
@@ -361,10 +403,12 @@ public class Main {
                 case 4 -> { //Listado de productos activos
                     System.out.println("\n--- LISTADO DE PRODUCTOS ACTIVOS ---");
 
-                    if (productoRepo.listarActivos().stream().findAny().isEmpty()) {
+                    List<Producto> productos = productoRepo.listarActivos();
+
+                    if (productos.stream().findAny().isEmpty()) {
                         System.out.println("No hay productos activos.");
                     } else {
-                        productoRepo.listarActivos().forEach(p ->
+                        productos.forEach(p ->
                                 System.out.println("ID: " + p.getId() +
                                         " | Nombre: " + p.getNombre() +
                                         " | Precio: " + p.getPrecio() +
