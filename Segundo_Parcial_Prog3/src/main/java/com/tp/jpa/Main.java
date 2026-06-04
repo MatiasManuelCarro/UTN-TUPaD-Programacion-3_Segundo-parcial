@@ -8,10 +8,15 @@ import com.tp.jpa.repository.ProductoRepository;
 import java.util.List;
 import java.util.Optional;
 import java.util.Scanner;
+import java.util.logging.Level;
 
 
 public class Main {
     public static void main(String[] args) {
+
+
+        //quta los logs de hibernate dejando solo los errores.
+        java.util.logging.Logger.getLogger("org.hibernate").setLevel(Level.SEVERE);
 
         Scanner sc = new Scanner(System.in);
 
@@ -21,13 +26,15 @@ public class Main {
         int opcion;
 
         do {
-            System.out.println("\n===== MENÚ PRINCIPAL =====");
+            System.out.println("\n");
+            System.out.println("===== MENÚ PRINCIPAL =====\n..........................");
             System.out.println("1. Gestión de Categorías");
             System.out.println("2. Gestión de Productos");
             System.out.println("3. Reportes");
             System.out.println("0. Salir");
+            System.out.println("..........................\n");
 
-            opcion = intSeguro(sc, "Ingrese un numero");
+            opcion = intSeguro(sc, "Ingrese un numero: ");
 
             switch (opcion) {
 
@@ -43,25 +50,36 @@ public class Main {
                     System.out.println("1. Buscar Productos por categoria");
                     System.out.println("0. Volver al menu principal");
 
-                    int opcionReporte = intSeguro(sc, "Ingrese un numero");
+                    int opcionReporte = intSeguro(sc, "Ingrese un numero: \n");
 
                     switch (opcionReporte) {
                         case 1 -> {
 
                             mostrarCategoriasActivas(categoriaRepo);
 
-                            Long idReporte = LongSeguro(sc, "Seleccione ID de categoría: ");
+                            Long idReporte = LongSeguro(sc, "\nSeleccione ID de categoría: ");
 
                             List<Producto> productos = productoRepo.buscarPorCategoria(idReporte);
 
-                            mostrarProductosActivos(productoRepo);
+                            if (productos.stream().findAny().isEmpty()) {
+                                System.out.println("No hay productos activos.");
+                            } else {
+                                System.out.println("Productos de la categoria: ");
+                                productos.forEach(p ->
+                                        System.out.println(
+                                                "ID: " + p.getId() +
+                                                        " | Nombre: " + p.getNombre() +
+                                                        " | Precio: " + p.getPrecio() +
+                                                        " | Descripcion: " + p.getDescripcion() +
+                                                        " | Stock: " + p.getStock() +
+                                                        " | Categoría: " + p.getCategoria().getNombre()
+                                        )
+                                );}
 
                         }
-                        case 0 -> {
-                            System.out.println("Volviendo al menú principal...");
-                        }
+                        case 0 -> System.out.println("Volviendo al menú principal...");
+
                     }
-
 
                 }
 
@@ -80,13 +98,16 @@ public class Main {
         int opcion;
 
         do {
+            System.out.println("\n");
             System.out.println("\n===== MENÚ DE CATEGORÍAS =====");
             System.out.println("1. Alta de categoría");
             System.out.println("2. Baja lógica de categoría");
             System.out.println("3. Modificación de categoría");
             System.out.println("4. Listado de categorías activas");
             System.out.println("0. Volver al Menu Principal");
-            opcion = intSeguro(sc, "Ingrese un numero");
+            System.out.println("..........................\n");
+
+            opcion = intSeguro(sc, "Ingrese un numero: ");
 
 
             switch (opcion) {
@@ -196,23 +217,22 @@ public class Main {
         int opcion;
 
         do {
+            System.out.println("\n");
             System.out.println("\n===== MENÚ DE PRODUCTOS =====");
             System.out.println("1. Alta de producto");
             System.out.println("2. Baja lógica de producto");
             System.out.println("3. Modificación de producto");
             System.out.println("4. Listado de productos activos");
             System.out.println("0. Volver al Menu Principal");
-            opcion = intSeguro(sc, "Ingrese un numero");
+            System.out.println("..........................\n");
+            opcion = intSeguro(sc, "Ingrese un numero: ");
 
             switch (opcion) {
 
                 case 1 -> { //Alta de producto
                     System.out.println("\n--- ALTA DE PRODUCTO ---");
 
-                    List<Categoria> categorias = categoriaRepo.listarActivos();
-
                     mostrarCategoriasActivas(categoriaRepo);
-
 
                     System.out.print("Seleccione ID de categoría: ");
                     //verificar long
@@ -399,9 +419,9 @@ private static Long LongSeguro(Scanner sc, String mensaje) {
     }
 }
 
-private static int intSeguro(Scanner sc, String message) {
+private static int intSeguro(Scanner sc, String mensaje) {
     while (true) {
-        System.out.print("Seleccione una opción: ");
+        System.out.print(mensaje);
         String input = sc.nextLine();
 
         try {
