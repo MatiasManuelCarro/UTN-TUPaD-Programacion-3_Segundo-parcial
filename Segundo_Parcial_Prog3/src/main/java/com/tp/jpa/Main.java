@@ -5,10 +5,14 @@ import com.tp.jpa.model.entities.Producto;
 import com.tp.jpa.repository.CategoriaRepository;
 import com.tp.jpa.repository.ProductoRepository;
 
-import java.util.List;
 import java.util.Optional;
 import java.util.Scanner;
 import java.util.logging.Level;
+
+import static com.tp.jpa.util.Reports.*;
+import static com.tp.jpa.util.Input.*;
+import static com.tp.jpa.util.Validator.validarNombreCategoria;
+import static com.tp.jpa.util.Validator.validarNombreProducto;
 
 
 public class Main {
@@ -58,7 +62,7 @@ public class Main {
                             if (!mostrarCategoriasActivas(categoriaRepo)) {
                                 System.out.println("Operación cancelada.");
                                 break;
-                            };
+                            }
 
                             Long idReporte = LongSeguro(sc, "\nSeleccione ID de categoría: ");
 
@@ -209,7 +213,7 @@ public class Main {
 
                     if (!mostrarCategoriasActivas(categoriaRepo)) {
                         System.out.println("No hay categorías activas. Operación cancelada.");
-                        break;
+
                     }
 
                 }
@@ -416,191 +420,6 @@ public class Main {
 
     } while(opcion !=0);
 }
-
-private static Double DoubleSeguro(Scanner sc, String mensaje) {
-    while (true) {
-        System.out.print(mensaje);
-        String input = sc.nextLine();
-
-        try {
-            return Double.parseDouble(input);
-        } catch (NumberFormatException e) {
-            System.out.println("Debe ingresar un número válido.");
-        }
-    }
-}
-
-private static Long LongSeguro(Scanner sc, String mensaje) {
-    while (true) {
-        System.out.print(mensaje);
-        String input = sc.nextLine();
-
-        try {
-            return Long.parseLong(input);
-        } catch (NumberFormatException e) {
-            System.out.println("Debe ingresar un número válido.");
-        }
-    }
-}
-
-private static int intSeguro(Scanner sc, String mensaje) {
-    while (true) {
-        System.out.print(mensaje);
-        String input = sc.nextLine();
-
-        try {
-            return Integer.parseInt(input);
-        } catch (NumberFormatException e) {
-            System.out.println("Debe ingresar un número válido.");
-        }
-    }
-}
-
-private static boolean validarNombreCategoria(String nombre, CategoriaRepository categoriaRepo, Scanner sc) {
-    //Validacion de nombre duplicado
-    boolean existe = categoriaRepo.listarActivos()
-            .stream()
-            .anyMatch(c -> c.getNombre().equalsIgnoreCase(nombre));
-
-    Optional<Categoria> categoriaInactiva = categoriaRepo.listarInactivos()
-            .stream()
-            .filter(c -> c.getNombre().equalsIgnoreCase(nombre))
-            .findFirst();
-
-    //verificacion de categoria repetida
-    if (existe) {
-        System.out.println("Ya existe una categoría con ese nombre.");
-        return true; // no continua
-    }
-    //verificacion de categoria existente pero con baja logica
-    if (categoriaInactiva.isPresent()) {
-        System.out.println("Ya existe una categoría con ese nombre, pero se encuentra inactiva" +
-                "\n ¿Desea activarla nuevamente");
-        System.out.println("1. Si");
-        System.out.println("2. No");
-        int opcionAlta = intSeguro(sc, "Seleccione una opción: ");
-
-        switch (opcionAlta) {
-            case 1 -> {
-                Categoria cat = categoriaInactiva.get();
-                categoriaRepo.AltaLogica(cat.getId());
-                System.out.println("Categoría reactivada correctamente. ID: " + cat.getId());
-                return true;
-            }
-            case 2 -> {
-                System.out.println("Operación cancelada.");
-                return true; //no continua
-            }
-
-        }
-
-    }
-    return false; //si pasa las evaluaciones continua con el alta
-}
-
-private static boolean mostrarCategoriasActivas(CategoriaRepository categoriaRepo) {
-
-        List<Categoria> categorias = categoriaRepo.listarActivos();
-
-    if (categorias.stream().findAny().isEmpty()) {
-        System.out.println("No hay categorías activas.");
-        return false;
-    } else {
-        System.out.println("Categorias disponibles :");
-        categorias.forEach(cat ->
-                System.out.println(
-                        "ID: " + cat.getId() +
-                                " | Nombre: " + cat.getNombre() +
-                                " | Descripcion: " + cat.getDescripcion()
-                )
-        );
-        return true;}
-}
-
-private static boolean mostrarProductosActivos(ProductoRepository productoRepo) {
-
-        List <Producto> productos = productoRepo.listarActivos();
-
-    if (productos.stream().findAny().isEmpty()) {
-        System.out.println("No hay productos activos.");
-        return false;
-    } else {
-        productos.forEach(p ->
-                System.out.println(
-                        "ID: " + p.getId() +
-                                " | Nombre: " + p.getNombre() +
-                                " | Precio: " + p.getPrecio() +
-                                " | Descripcion: " + p.getDescripcion() +
-                                " | Stock: " + p.getStock() +
-                                " | Categoría: " + p.getCategoria().getNombre()
-                )
-        );
-        return true;
-    }
-}
-
-private static boolean validarNombreProducto(String nombre, ProductoRepository productoRepo, Scanner sc) {
-    boolean existe = productoRepo.listarActivos()
-            .stream()
-            .anyMatch(c -> c.getNombre().equalsIgnoreCase(nombre));
-
-    Optional<Producto> prodInactivo = productoRepo.listarInactivos()
-            .stream()
-            .filter(c -> c.getNombre().equalsIgnoreCase(nombre))
-            .findFirst();
-
-    //verificacion de producto repetido
-    if (existe) {
-        System.out.println("Ya existe un producto con ese nombre.");
-        return true; // no continua
-    }
-
-    //verificacion de producto existente pero con baja logica
-    if (prodInactivo.isPresent()) {
-        System.out.println("Ya existe un producto con ese nombre, pero se encuentra inactivo" +
-                "\n ¿Desea activarlo nuevamente");//
-        System.out.println("1. Si");
-        System.out.println("2. No");
-        int opcionAltaProd = intSeguro(sc, "Seleccione una opción: ");
-
-        switch (opcionAltaProd) {
-            case 1 -> {
-                Producto prod = prodInactivo.get();
-                productoRepo.AltaLogica(prod.getId());
-                System.out.println("Producto reactivado correctamente. ID: " + prod.getId());
-                return true; // no continua
-            }
-            case 2 -> {
-                System.out.println("Operación cancelada.");
-                return true; // no continua
-            }
-        }
-
-
-    }
-    return false; //si pasa las evaluaciones continua con el alta
-}
-
-private static void listarProductoPorCategoriaHelper(ProductoRepository productoRepo, long idReporte){
-
-    List<Producto> productos = productoRepo.buscarPorCategoria(idReporte);
-
-    if (productos.stream().findAny().isEmpty()) {
-        System.out.println("No hay productos activos.");
-    } else {
-        System.out.println("Productos de la categoria: ");
-        productos.forEach(p ->
-                System.out.println(
-                        "ID: " + p.getId() +
-                                " | Nombre: " + p.getNombre() +
-                                " | Precio: " + p.getPrecio() +
-                                " | Descripcion: " + p.getDescripcion() +
-                                " | Stock: " + p.getStock() +
-                                " | Categoría: " + p.getCategoria().getNombre()
-                )
-        );}
-}
-
 
 }
 
