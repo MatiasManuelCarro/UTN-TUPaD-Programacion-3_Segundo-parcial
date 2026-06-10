@@ -13,7 +13,7 @@ public class Reports {
         List<Producto> productos = productoRepo.buscarPorCategoria(idReporte);
 
         if (productos.stream().findAny().isEmpty()) {
-            System.out.println("No hay productos activos.");
+            System.out.println("No hay productos activos para la categoría seleccionada.");
         } else {
             System.out.println("Productos de la categoria: ");
             productos.forEach(p ->

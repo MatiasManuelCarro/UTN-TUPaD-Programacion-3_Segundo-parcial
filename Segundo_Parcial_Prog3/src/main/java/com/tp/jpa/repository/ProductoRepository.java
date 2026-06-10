@@ -11,6 +11,9 @@ public class ProductoRepository extends BaseRepository<Producto> {
         super(Producto.class);
     }
 
+
+    // Consulta JPQL que obtiene todos los productos activos de una categoría
+    // filtrando por p.categoria.id = :categoriaId y p.eliminado = false.
     public List<Producto> buscarPorCategoria(Long categoriaId) {
         var em = emf.createEntityManager();
 

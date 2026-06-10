@@ -114,7 +114,7 @@ public class Main {
                     System.out.print("Nombre: ");
                     String nombre = sc.nextLine();
 
-                    if (nombre.isBlank()){
+                    if (nombre.isBlank()) {
                         System.out.println("No se puede crear una categoria sin nombre. Operación cancelada.");
                         break;
                     }
@@ -274,12 +274,14 @@ public class Main {
 
                     System.out.print("Nombre: ");
                     String nombre = sc.nextLine();
-
+                    if (nombre.isBlank()) {
+                        System.out.println("El nombre no puede estar vacío.");
+                        break;
+                    }
                     if (validarNombreProducto(nombre, productoRepo, sc)) {
                         break; // salir del case sin pedir descripción
                     }
 
-//
                     System.out.print("Descripción: ");
                     String descripcion = sc.nextLine();
 
@@ -371,20 +373,32 @@ public class Main {
 
                     System.out.print("Nuevo nombre (ENTER para mantener): ");
                     String nuevoNombre = sc.nextLine();
-                    if (!nuevoNombre.isBlank()) prod.setNombre(nuevoNombre);
-
-                    if (validarNombreProducto(nuevoNombre, productoRepo, sc)) {
-                        break; // salir del case sin pedir descripción
+                    if (!nuevoNombre.isBlank()) {
+                        if (validarNombreProducto(nuevoNombre, productoRepo, sc)) {
+                            break;
+                        }
+                        prod.setNombre(nuevoNombre);
                     }
 
+
                     System.out.print("Nuevo precio (ENTER para mantener): ");
-                    String nuevoPrecio = sc.nextLine();
-                    if (!nuevoPrecio.isBlank()) {
-                        double precio = Double.parseDouble(nuevoPrecio);
+                    String inputPrecio = sc.nextLine();
+
+                    if (!inputPrecio.isBlank()) {
+                        double precio;
+
+                        try {
+                            precio = Double.parseDouble(inputPrecio); //intenta parsearlo
+                        } catch (NumberFormatException e) {
+                            //si falla llama la funcion doubleseguro
+                            precio = DoubleSeguro(sc, "Ingrese el nuevo precio, recuerde utilizar solo numeros : ");
+                        }
+
                         if (precio <= 0) {
                             System.out.println("El precio debe ser mayor a 0.");
                             break;
                         }
+
                         prod.setPrecio(precio);
                     }
 
@@ -393,13 +407,23 @@ public class Main {
                     if (!nuevaDescripcion.isBlank()) prod.setDescripcion(nuevaDescripcion);
 
                     System.out.print("Nuevo stock (ENTER para mantener): ");
-                    String nuevoStock = sc.nextLine();
-                    if (!nuevoStock.isBlank()) {
-                        int stock = Integer.parseInt(nuevoStock);
+                    String inputStock = sc.nextLine();
+
+                    if (!inputStock.isBlank()) {
+                        int stock;
+
+                        try {
+                            stock = Integer.parseInt(inputStock); //intenta parsearlo
+                        } catch (NumberFormatException e) {
+                            //si falla llama la funcion intseguro
+                            stock = intSeguro(sc, "Ingrese el nuevo stock, recuerde utilizar solo numeros : ");
+                        }
+
                         if (stock < 0) {
                             System.out.println("El stock no puede ser negativo.");
                             break;
                         }
+
                         prod.setStock(stock);
                     }
 
@@ -417,13 +441,13 @@ public class Main {
                 }
 
 
-            // Volver
-            case 0 -> System.out.println("Volviendo al menú principal...");
-            default -> System.out.println("Opción inválida.");
-        }
+                // Volver
+                case 0 -> System.out.println("Volviendo al menú principal...");
+                default -> System.out.println("Opción inválida.");
+            }
 
-    } while(opcion !=0);
-}
+        } while (opcion != 0);
+    }
 
 }
 
