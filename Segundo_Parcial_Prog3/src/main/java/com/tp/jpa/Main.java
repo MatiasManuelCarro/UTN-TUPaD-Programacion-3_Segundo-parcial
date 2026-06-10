@@ -15,7 +15,7 @@ public class Main {
     public static void main(String[] args) {
 
 
-        //quta los logs de hibernate dejando solo los errores.
+        //quita los logs de hibernate dejando solo los errores.
         java.util.logging.Logger.getLogger("org.hibernate").setLevel(Level.SEVERE);
 
         Scanner sc = new Scanner(System.in);
@@ -47,7 +47,7 @@ public class Main {
                     System.out.println("\n--- REPORTES ---");
                     System.out.println("Elija una opcion: ");
 
-                    System.out.println("1. Buscar Productos por categoria");
+                    System.out.println("1. Listar  Productos por categoria");
                     System.out.println("0. Volver al menu principal");
 
                     int opcionReporte = intSeguro(sc, "Ingrese un numero: \n");
@@ -55,26 +55,15 @@ public class Main {
                     switch (opcionReporte) {
                         case 1 -> {
 
-                            mostrarCategoriasActivas(categoriaRepo);
+                            if (!mostrarCategoriasActivas(categoriaRepo)) {
+                                System.out.println("Operación cancelada.");
+                                break;
+                            };
 
                             Long idReporte = LongSeguro(sc, "\nSeleccione ID de categoría: ");
 
-                            List<Producto> productos = productoRepo.buscarPorCategoria(idReporte);
+                            listarProductoPorCategoriaHelper(productoRepo, idReporte);
 
-                            if (productos.stream().findAny().isEmpty()) {
-                                System.out.println("No hay productos activos.");
-                            } else {
-                                System.out.println("Productos de la categoria: ");
-                                productos.forEach(p ->
-                                        System.out.println(
-                                                "ID: " + p.getId() +
-                                                        " | Nombre: " + p.getNombre() +
-                                                        " | Precio: " + p.getPrecio() +
-                                                        " | Descripcion: " + p.getDescripcion() +
-                                                        " | Stock: " + p.getStock() +
-                                                        " | Categoría: " + p.getCategoria().getNombre()
-                                        )
-                                );}
 
                         }
                         case 0 -> System.out.println("Volviendo al menú principal...");
@@ -117,8 +106,13 @@ public class Main {
                     System.out.print("Nombre: ");
                     String nombre = sc.nextLine();
 
+                    if (nombre.isBlank()){
+                        System.out.println("No se puede crear una categoria sin nombre. Operación cancelada.");
+                        break;
+                    }
+
                     if (validarNombreCategoria(nombre, categoriaRepo, sc)) {
-                        break; // salir del case sin pedir descripción
+                        break; // si devuelve true no continua
                     }
 
                     System.out.print("Descripción: ");
@@ -137,7 +131,11 @@ public class Main {
                 case 2 -> { //Baja logica de Categoria
                     System.out.println("\n--- BAJA LÓGICA DE CATEGORÍA ---");
 
-                    mostrarCategoriasActivas(categoriaRepo);
+
+                    if (!mostrarCategoriasActivas(categoriaRepo)) {
+                        System.out.println("Operación cancelada.");
+                        break;
+                    }
 
                     System.out.print("Elija una categoria ");
 
@@ -145,19 +143,29 @@ public class Main {
                     Long id = LongSeguro(sc, "Seleccione ID:");
 
 
-                    boolean eliminado = categoriaRepo.eliminarLogico(id);
+                    Optional<Categoria> optionalCat = categoriaRepo.buscarPorId(id);
 
-                    if (eliminado) {
-                        System.out.println("Categoría eliminada correctamente.");
+                    if (optionalCat.isEmpty() || optionalCat.get().isEliminado()) {
+                        System.out.println("No existe una categoría activa con ese ID.");
                     } else {
-                        System.out.println("No existe una categoría con ese ID.");
+                        Categoria cat = optionalCat.get();
+                        boolean eliminado = categoriaRepo.eliminarLogico(id);
+
+                        if (eliminado) {
+                            System.out.println("Categoría dada de baja: " + cat.getNombre());
+                        } else {
+                            System.out.println("No se pudo eliminar la categoría.");
+                        }
                     }
                 }
 
                 case 3 -> { //modificar categoria
                     System.out.println("\n--- MODIFICACIÓN DE CATEGORÍA ---");
 
-                    mostrarCategoriasActivas(categoriaRepo);
+                    if (!mostrarCategoriasActivas(categoriaRepo)) {
+                        System.out.println("No hay categorías activas. Operación cancelada.");
+                        break;
+                    }
 
                     //revisar
 
@@ -198,7 +206,11 @@ public class Main {
                     // Listar categorias
                     System.out.println("\n--- LISTADO DE CATEGORÍAS ACTIVAS ---");
 
-                    mostrarCategoriasActivas(categoriaRepo);
+
+                    if (!mostrarCategoriasActivas(categoriaRepo)) {
+                        System.out.println("No hay categorías activas. Operación cancelada.");
+                        break;
+                    }
 
                 }
 
@@ -232,7 +244,11 @@ public class Main {
                 case 1 -> { //Alta de producto
                     System.out.println("\n--- ALTA DE PRODUCTO ---");
 
-                    mostrarCategoriasActivas(categoriaRepo);
+
+                    if (!mostrarCategoriasActivas(categoriaRepo)) {
+                        System.out.println("Operación cancelada.");
+                        break;
+                    }
 
                     System.out.print("Seleccione ID de categoría: ");
                     //verificar long
@@ -293,7 +309,11 @@ public class Main {
                 case 2 -> { //Baja lógica de producto
                     System.out.println("\n--- BAJA LÓGICA DE PRODUCTO ---");
 
-                    mostrarProductosActivos(productoRepo);
+
+                    if (!mostrarProductosActivos(productoRepo)) {
+                        System.out.println("Operación cancelada.");
+                        break;
+                    }
 
                     Long id = LongSeguro(sc, "Seleccione ID de producto: ");
 
@@ -318,7 +338,11 @@ public class Main {
                 case 3 -> { //Modificación de producto
                     System.out.println("\n--- MODIFICACIÓN DE PRODUCTO ---");
 
-                    mostrarProductosActivos(productoRepo);
+
+                    if (!mostrarProductosActivos(productoRepo)) {
+                        System.out.println("Operación cancelada.");
+                        break;
+                    }
 
                     Long id = LongSeguro(sc, "Seleccione ID de producto: ");
 
@@ -358,8 +382,7 @@ public class Main {
 
                     System.out.print("Nueva descripción (ENTER para mantener): ");
                     String nuevaDescripcion = sc.nextLine();
-                    if (!nuevaDescripcion.isBlank()) prod.setNombre(nuevaDescripcion);
-
+                    if (!nuevaDescripcion.isBlank()) prod.setDescripcion(nuevaDescripcion);
 
                     System.out.print("Nuevo stock (ENTER para mantener): ");
                     String nuevoStock = sc.nextLine();
@@ -381,6 +404,7 @@ public class Main {
                     System.out.println("\n--- LISTADO DE PRODUCTOS ACTIVOS ---");
 
                     mostrarProductosActivos(productoRepo);
+
 
                 }
 
@@ -474,12 +498,13 @@ private static boolean validarNombreCategoria(String nombre, CategoriaRepository
     return false; //si pasa las evaluaciones continua con el alta
 }
 
-private static void mostrarCategoriasActivas(CategoriaRepository categoriaRepo) {
+private static boolean mostrarCategoriasActivas(CategoriaRepository categoriaRepo) {
 
         List<Categoria> categorias = categoriaRepo.listarActivos();
 
     if (categorias.stream().findAny().isEmpty()) {
         System.out.println("No hay categorías activas.");
+        return false;
     } else {
         System.out.println("Categorias disponibles :");
         categorias.forEach(cat ->
@@ -488,15 +513,17 @@ private static void mostrarCategoriasActivas(CategoriaRepository categoriaRepo) 
                                 " | Nombre: " + cat.getNombre() +
                                 " | Descripcion: " + cat.getDescripcion()
                 )
-        );}
+        );
+        return true;}
 }
 
-private static void mostrarProductosActivos(ProductoRepository productoRepo) {
+private static boolean mostrarProductosActivos(ProductoRepository productoRepo) {
 
         List <Producto> productos = productoRepo.listarActivos();
 
     if (productos.stream().findAny().isEmpty()) {
         System.out.println("No hay productos activos.");
+        return false;
     } else {
         productos.forEach(p ->
                 System.out.println(
@@ -508,6 +535,7 @@ private static void mostrarProductosActivos(ProductoRepository productoRepo) {
                                 " | Categoría: " + p.getCategoria().getNombre()
                 )
         );
+        return true;
     }
 }
 
@@ -551,7 +579,30 @@ private static boolean validarNombreProducto(String nombre, ProductoRepository p
 
     }
     return false; //si pasa las evaluaciones continua con el alta
-}}
+}
+
+private static void listarProductoPorCategoriaHelper(ProductoRepository productoRepo, long idReporte){
+
+    List<Producto> productos = productoRepo.buscarPorCategoria(idReporte);
+
+    if (productos.stream().findAny().isEmpty()) {
+        System.out.println("No hay productos activos.");
+    } else {
+        System.out.println("Productos de la categoria: ");
+        productos.forEach(p ->
+                System.out.println(
+                        "ID: " + p.getId() +
+                                " | Nombre: " + p.getNombre() +
+                                " | Precio: " + p.getPrecio() +
+                                " | Descripcion: " + p.getDescripcion() +
+                                " | Stock: " + p.getStock() +
+                                " | Categoría: " + p.getCategoria().getNombre()
+                )
+        );}
+}
+
+
+}
 
 
 
