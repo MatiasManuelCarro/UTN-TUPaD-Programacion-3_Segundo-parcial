@@ -4,6 +4,7 @@ import com.tp.jpa.model.entities.Categoria;
 import com.tp.jpa.model.entities.Producto;
 import com.tp.jpa.repository.CategoriaRepository;
 import com.tp.jpa.repository.ProductoRepository;
+import com.tp.jpa.util.DataLoader;
 
 import java.util.Optional;
 import java.util.Scanner;
@@ -26,6 +27,9 @@ public class Main {
 
         CategoriaRepository categoriaRepo = new CategoriaRepository();
         ProductoRepository productoRepo = new ProductoRepository();
+
+        //Clase solo para pruebas - carga categorias y productos si la base se encuentra vacia.
+        DataLoader.load(categoriaRepo, productoRepo);
 
         int opcion;
 

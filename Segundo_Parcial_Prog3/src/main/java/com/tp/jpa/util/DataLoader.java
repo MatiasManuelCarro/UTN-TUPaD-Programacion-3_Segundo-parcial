@@ -7,11 +7,11 @@ import com.tp.jpa.repository.ProductoRepository;
 
 public class DataLoader {
 
-    public static void seed(CategoriaRepository categoriaRepo, ProductoRepository productoRepo) {
+    public static void load(CategoriaRepository categoriaRepo, ProductoRepository productoRepo) {
 
-        //ESTA CLASE ES SOLO PARA PRUEBAS DEL CODIGO. CARGA SI LA BASE SE ENCUENTRA VACIA.
+        //ESTA CLASE ES SOLO PARA PRUEBAS DEL CODIGO. CARGA CATEGORIAS Y PRODUCTOS SI LA BASE SE ENCUENTRA VACIA.
         // Si ya existen categorías o productos cargados, no carga nada
-        if (!categoriaRepo.listarActivos().isEmpty() && !categoriaRepo.listarInactivos().isEmpty() && !productoRepo.listarActivos().isEmpty() && !productoRepo.listarInactivos().isEmpty()) {
+        if (!categoriaRepo.listarActivos().isEmpty() || !categoriaRepo.listarInactivos().isEmpty() || !productoRepo.listarActivos().isEmpty() || !productoRepo.listarInactivos().isEmpty()) {
             return;
         }
 
