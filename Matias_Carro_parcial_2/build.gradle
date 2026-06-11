@@ -1,5 +1,6 @@
 plugins {
     id 'java'
+    id 'application'
 }
 
 group = 'org.jcr'
@@ -29,6 +30,14 @@ dependencies {
 
 }
 
+application {
+    mainClass = 'com.tp.jpa.Main'
+}
+
 test {
     useJUnitPlatform()
+}
+
+tasks.named('run') {
+    standardInput = System.in
 }
