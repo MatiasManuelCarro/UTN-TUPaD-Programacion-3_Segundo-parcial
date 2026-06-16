@@ -1,7 +1,7 @@
 package com.tp.jpa.model.entities;
 
-import ar.edu.tup.programacion3.enums.Estado;
-import ar.edu.tup.programacion3.enums.FormaPago;
+import com.tp.jpa.model.enums.Estado;
+import com.tp.jpa.model.enums.FormaPago;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.SuperBuilder;

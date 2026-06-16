@@ -1,4 +1,4 @@
-package ar.edu.tup.programacion3.dtos;
+package com.tp.jpa.model.dtos;
 
 public record UsuarioDTO(
         String nombre,
